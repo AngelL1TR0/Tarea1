@@ -8,25 +8,26 @@ public class RecieveTask implements Runnable {
 
     private Semaphore recievePackageSemaphore;
 
-    private List lista;
+    private List<Integer> packages;
 
-    public RecieveTask(Semaphore sendPackageSemaphore, Semaphore recievePackageSemaphore, List lista) {
+    public RecieveTask(Semaphore sendPackageSemaphore, Semaphore recievePackageSemaphore, List<Integer> packages) {
         this.sendPackageSemaphore = sendPackageSemaphore;
         this.recievePackageSemaphore = recievePackageSemaphore;
-        this.lista = lista;
+        this.packages = packages;
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         for (int i = 0; i < 100; i++) {
             try {
-                if (lista.isEmpty()) {
-                    recievePackageSemaphore.acquire();
-
-                }
+               sendPackageSemaphore.acquire();
+               int num = packages.remove(0);
+               System.out.println("Recibido paquete " + num);
+               Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            recievePackageSemaphore.release();
         }
     }
 }
